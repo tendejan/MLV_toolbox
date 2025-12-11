@@ -86,7 +86,16 @@ switch upper(method)
             error("One or more of the required addons to run the Segment Anything Model (SAM) are not installed: " + ...
                  "Image Processing Toolbox Model for Segment Anything Model, Deep Learning Toolbox.")
         end 
-        [masks,~] = imsegsam(img,ScoreThreshold=scoreThreshold);
+
+        % check for gpu
+        if canUseGPU()
+            disp('GPU detected - using GPU acceleration for SAM');
+            [masks,~] = imsegsam(img,ScoreThreshold=scoreThreshold, ExecutionEnvironment="gpu");
+        else
+            disp('No GPU detected - using CPU for SAM');
+            [masks,~] = imsegsam(img,ScoreThreshold=scoreThreshold);
+        end
+        
         labelMatrix = labelmatrix(masks);
         image = labelMatrix2edges(labelMatrix);
 
